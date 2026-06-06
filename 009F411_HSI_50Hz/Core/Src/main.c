@@ -18,7 +18,7 @@ int main(void) {
 
 	UART1_Init();
 	HAL_UART_Transmit(&huart1, (uint8_t*) greeting_message, strlen(greeting_message),
-			HAL_MAX_DELAY);
+	HAL_MAX_DELAY);
 
 	char msg[100];
 
@@ -46,11 +46,12 @@ void SystemClock_Config(void) {
 	RCC_OscInitTypeDef osc_init = { 0 };
 	RCC_ClkInitTypeDef clk_init = { 0 };
 
-	osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-	osc_init.HSEState = RCC_HSE_ON;
+	osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+	osc_init.HSIState = RCC_HSI_ON;
+	osc_init.HSICalibrationValue = 16;
 	osc_init.PLL.PLLState = RCC_PLL_ON;
-	osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-	osc_init.PLL.PLLM = 25;
+	osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+	osc_init.PLL.PLLM = 16;
 	osc_init.PLL.PLLN = 100;
 	osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 	osc_init.PLL.PLLQ = 4;
@@ -67,8 +68,6 @@ void SystemClock_Config(void) {
 	if (HAL_RCC_ClockConfig(&clk_init, FLASH_LATENCY_3) != HAL_OK) {
 		Error_Handler();
 	}
-
-	__HAL_RCC_HSI_DISABLE();
 
 	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
 
