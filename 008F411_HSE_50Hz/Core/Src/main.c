@@ -51,7 +51,7 @@ void SystemClock_Config(void) {
 	osc_init.PLL.PLLState = RCC_PLL_ON;
 	osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSE;
 	osc_init.PLL.PLLM = 25;
-	osc_init.PLL.PLLN = 200;
+	osc_init.PLL.PLLN = 100;
 	osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 	osc_init.PLL.PLLQ = 4;
 	if (HAL_RCC_OscConfig(&osc_init) != HAL_OK) {
