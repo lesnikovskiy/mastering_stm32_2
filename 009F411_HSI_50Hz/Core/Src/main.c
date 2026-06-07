@@ -1,7 +1,7 @@
 #include "main.h"
 
 #define SYS_CLOCK_FREQ_50MHZ    50
-#define SYS_CLOCK_FREQ_85MHZ    85
+#define SYS_CLOCK_FREQ_84MHZ    84
 #define SYS_CLOCK_FREQ_100MHZ   100
 
 void SystemClock_Config(uint8_t clock_freq);
@@ -16,7 +16,7 @@ char *greeting_message = "The application is running on STM32F411CEU6\r\n";
 int main(void) {
 	HAL_Init();
 
-	SystemClock_Config(SYS_CLOCK_FREQ_100MHZ);
+	SystemClock_Config(SYS_CLOCK_FREQ_84MHZ);
 
 	HAL_GPIO_MspInit();
 
@@ -50,6 +50,8 @@ void SystemClock_Config(uint8_t clock_freq) {
 	RCC_OscInitTypeDef osc_init = { 0 };
 	RCC_ClkInitTypeDef clk_init = { 0 };
 
+	uint32_t flash_latency = 0;
+
 	osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSI;
 	osc_init.HSIState = RCC_HSI_ON;
 	osc_init.HSICalibrationValue = 16;
@@ -57,30 +59,55 @@ void SystemClock_Config(uint8_t clock_freq) {
 	osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSI;
 
 	switch (clock_freq) {
-	case SYS_CLOCK_FREQ_50MHZ:
+	case SYS_CLOCK_FREQ_50MHZ: {
 		osc_init.PLL.PLLM = 16;
 		osc_init.PLL.PLLN = 100;
 		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
-		osc_init.PLL.PLLQ = 4;
+		osc_init.PLL.PLLQ = 2;
+
+		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1; // HCLK = 50MHz
+		clk_init.APB1CLKDivider = RCC_HCLK_DIV1;  // PCLK1 = 50MHz
+		clk_init.APB2CLKDivider = RCC_HCLK_DIV1;  // PLCK2 = 50MHz
+
+		flash_latency = FLASH_ACR_LATENCY_1WS;
+
 		break;
-	case SYS_CLOCK_FREQ_85MHZ:
+	}
+
+	case SYS_CLOCK_FREQ_84MHZ: {
 		osc_init.PLL.PLLM = 16;
-		osc_init.PLL.PLLN = 170;
+		osc_init.PLL.PLLN = 168;
 		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 		osc_init.PLL.PLLQ = 4;
+
+		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1; // HCLK = 84MHz
+		clk_init.APB1CLKDivider = RCC_HCLK_DIV2;  // PCLK1 = 42MHz
+		clk_init.APB2CLKDivider = RCC_HCLK_DIV1;  // PLCK2 = 84MHz
+
+		flash_latency = FLASH_ACR_LATENCY_2WS;
+
 		break;
-	case SYS_CLOCK_FREQ_100MHZ:
+	}
+
+	case SYS_CLOCK_FREQ_100MHZ: {
 		osc_init.PLL.PLLM = 16;
 		osc_init.PLL.PLLN = 200;
 		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 		osc_init.PLL.PLLQ = 4;
+
+		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1; // HCLK = 100MHz
+		clk_init.APB1CLKDivider = RCC_HCLK_DIV2;  // PCLK1 = 50MHz
+		clk_init.APB2CLKDivider = RCC_HCLK_DIV1;  // PLCK2 = 100MHz
+
+		flash_latency = FLASH_ACR_LATENCY_3WS;
+
 		break;
-	default:
-		osc_init.PLL.PLLM = 16;
-		osc_init.PLL.PLLN = 100;
-		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
-		osc_init.PLL.PLLQ = 4;
-		break;
+	}
+
+	default: {
+		return;
+	}
+
 	}
 
 	if (HAL_RCC_OscConfig(&osc_init) != HAL_OK) {
@@ -90,10 +117,8 @@ void SystemClock_Config(uint8_t clock_freq) {
 	clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1
 			| RCC_CLOCKTYPE_PCLK2;
 	clk_init.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-	clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1; // HCLK = 100MHz
-	clk_init.APB1CLKDivider = RCC_HCLK_DIV2;  // PCLK1 = 50MHz
-	clk_init.APB2CLKDivider = RCC_HCLK_DIV1;  // PLCK2 = 100MHz
-	if (HAL_RCC_ClockConfig(&clk_init, FLASH_LATENCY_3) != HAL_OK) {
+
+	if (HAL_RCC_ClockConfig(&clk_init, flash_latency) != HAL_OK) {
 		Error_Handler();
 	}
 
