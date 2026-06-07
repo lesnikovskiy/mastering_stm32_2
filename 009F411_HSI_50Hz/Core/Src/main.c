@@ -1,6 +1,10 @@
 #include "main.h"
 
-void SystemClock_Config(void);
+#define SYS_CLOCK_FREQ_50MHZ    50
+#define SYS_CLOCK_FREQ_85MHZ    85
+#define SYS_CLOCK_FREQ_100MHZ   100
+
+void SystemClock_Config(uint8_t clock_freq);
 void HAL_GPIO_MspInit(void);
 void UART1_Init(void);
 void Error_Handler(void);
@@ -12,7 +16,7 @@ char *greeting_message = "The application is running on STM32F411CEU6\r\n";
 int main(void) {
 	HAL_Init();
 
-	SystemClock_Config();
+	SystemClock_Config(SYS_CLOCK_FREQ_100MHZ);
 
 	HAL_GPIO_MspInit();
 
@@ -42,7 +46,7 @@ int main(void) {
 	return 0;
 }
 
-void SystemClock_Config(void) {
+void SystemClock_Config(uint8_t clock_freq) {
 	RCC_OscInitTypeDef osc_init = { 0 };
 	RCC_ClkInitTypeDef clk_init = { 0 };
 
@@ -51,10 +55,34 @@ void SystemClock_Config(void) {
 	osc_init.HSICalibrationValue = 16;
 	osc_init.PLL.PLLState = RCC_PLL_ON;
 	osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-	osc_init.PLL.PLLM = 16;
-	osc_init.PLL.PLLN = 100;
-	osc_init.PLL.PLLP = RCC_PLLP_DIV2;
-	osc_init.PLL.PLLQ = 4;
+
+	switch (clock_freq) {
+	case SYS_CLOCK_FREQ_50MHZ:
+		osc_init.PLL.PLLM = 16;
+		osc_init.PLL.PLLN = 100;
+		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
+		osc_init.PLL.PLLQ = 4;
+		break;
+	case SYS_CLOCK_FREQ_85MHZ:
+		osc_init.PLL.PLLM = 16;
+		osc_init.PLL.PLLN = 170;
+		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
+		osc_init.PLL.PLLQ = 4;
+		break;
+	case SYS_CLOCK_FREQ_100MHZ:
+		osc_init.PLL.PLLM = 16;
+		osc_init.PLL.PLLN = 200;
+		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
+		osc_init.PLL.PLLQ = 4;
+		break;
+	default:
+		osc_init.PLL.PLLM = 16;
+		osc_init.PLL.PLLN = 100;
+		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
+		osc_init.PLL.PLLQ = 4;
+		break;
+	}
+
 	if (HAL_RCC_OscConfig(&osc_init) != HAL_OK) {
 		Error_Handler();
 	}
