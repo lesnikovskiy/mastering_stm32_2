@@ -16,7 +16,7 @@ char *greeting_message = "The application is running on STM32F411CEU6\r\n";
 int main(void) {
 	HAL_Init();
 
-	SystemClock_Config(SYS_CLOCK_FREQ_84MHZ);
+	SystemClock_Config(SYS_CLOCK_FREQ_100MHZ);
 
 	HAL_GPIO_MspInit();
 
@@ -60,10 +60,10 @@ void SystemClock_Config(uint8_t clock_freq) {
 
 	switch (clock_freq) {
 	case SYS_CLOCK_FREQ_50MHZ: {
-		osc_init.PLL.PLLM = 16;
+		osc_init.PLL.PLLM = 25;
 		osc_init.PLL.PLLN = 100;
 		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
-		osc_init.PLL.PLLQ = 2;
+		osc_init.PLL.PLLQ = 4;
 
 		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1; // HCLK = 50MHz
 		clk_init.APB1CLKDivider = RCC_HCLK_DIV1;  // PCLK1 = 50MHz
@@ -75,7 +75,7 @@ void SystemClock_Config(uint8_t clock_freq) {
 	}
 
 	case SYS_CLOCK_FREQ_84MHZ: {
-		osc_init.PLL.PLLM = 16;
+		osc_init.PLL.PLLM = 25;
 		osc_init.PLL.PLLN = 168;
 		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 		osc_init.PLL.PLLQ = 4;
@@ -90,7 +90,7 @@ void SystemClock_Config(uint8_t clock_freq) {
 	}
 
 	case SYS_CLOCK_FREQ_100MHZ: {
-		osc_init.PLL.PLLM = 16;
+		osc_init.PLL.PLLM = 25;
 		osc_init.PLL.PLLN = 200;
 		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 		osc_init.PLL.PLLQ = 4;
