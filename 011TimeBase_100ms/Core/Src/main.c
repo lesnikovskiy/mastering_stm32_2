@@ -66,6 +66,8 @@ void SystemClock_Config(void) {
 }
 
 void GPIO_Init(void) {
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+
 	GPIO_InitTypeDef ledgpio;
 
 	ledgpio.Pin = GPIO_PIN_13;
@@ -73,8 +75,6 @@ void GPIO_Init(void) {
 	ledgpio.Pull = GPIO_NOPULL;
 
 	HAL_GPIO_Init(GPIOC, &ledgpio);
-
-	__HAL_RCC_GPIOC_CLK_ENABLE();
 }
 
 void TIM11_Init(void) {
