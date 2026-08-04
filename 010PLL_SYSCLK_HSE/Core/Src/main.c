@@ -21,8 +21,9 @@ int main(void) {
 	HAL_GPIO_MspInit();
 
 	UART1_Init();
-	HAL_UART_Transmit(&huart1, (uint8_t*) greeting_message, strlen(greeting_message),
-	HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart1, (uint8_t*) greeting_message,
+			strlen(greeting_message),
+			HAL_MAX_DELAY);
 
 	char msg[100];
 
@@ -114,8 +115,8 @@ void SystemClock_Config(uint8_t clock_freq) {
 		Error_Handler();
 	}
 
-	clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1
-			| RCC_CLOCKTYPE_PCLK2;
+	clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK
+			| RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 	clk_init.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
 
 	if (HAL_RCC_ClockConfig(&clk_init, flash_latency) != HAL_OK) {
@@ -145,5 +146,6 @@ void UART1_Init() {
 void Error_Handler(void) {
 	__disable_irq();
 
-	while (1);
+	while (1)
+		;
 }
