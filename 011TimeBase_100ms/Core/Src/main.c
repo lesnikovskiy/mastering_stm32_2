@@ -73,6 +73,8 @@ void GPIO_Init(void) {
 	ledgpio.Pull = GPIO_NOPULL;
 
 	HAL_GPIO_Init(GPIOC, &ledgpio);
+
+	__HAL_RCC_GPIOC_CLK_ENABLE();
 }
 
 void TIM11_Init(void) {
