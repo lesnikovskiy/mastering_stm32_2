@@ -54,7 +54,20 @@ void SystemClock_Config(void) {
 
 void TIM11_Init(void) {
 	htimer11.Instance = TIM11;
-	htimer11.Init.CounterMode = TIM_COUNTERMODE_UP; // Always default for Basic Timers and cannot be changed
+	// CounterMode is always default for Basic Timers and cannot be changed
+	htimer11.Init.CounterMode = TIM_COUNTERMODE_UP;
+	// CNT_CLK = TIMxCLK from RCC
+	// CNT_CLK = TIMx_CLK / (prescaler + 1)
+	// HSE CNT_CLK = 25 / (1 + 1) = 12
+	// Range 0x00 to 0xFFFF (16bit)
+	htimer11.Init.Prescaler = 999;
+	// if value 0 timer won't start
+	// we need -1 to get the exact count as it will take +1 more
+	htimer11.Init.Period = 10000 - 1;
+
+	if (HAL_TIM_Base_Init(&htimer11) != HAL_OK) {
+		Error_Handler();
+	}
 }
 
 void Error_Handler(void) {
