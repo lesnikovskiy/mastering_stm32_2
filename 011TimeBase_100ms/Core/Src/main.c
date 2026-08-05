@@ -83,12 +83,8 @@ void TIM11_Init(void) {
 	htimer11.Instance = TIM11;
 	/* CounterMode is always default for Basic Timers and cannot be changed */
 	htimer11.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htimer11.Init.Prescaler = 100 - 1; // 100 MHz / 100 = 1 MHz timer clock
-	htimer11.Init.Period = 250 - 1;    // 250 ticks = 0.25 ms delay
-
-	/* Uncomment to see LED blinking */
-	htimer11.Init.Prescaler = 1000 - 1; // Slow down timer clock to 100 kHz
-	htimer11.Init.Period = 50000 - 1;   // 50,000 ticks = 500 ms (0.5 seconds)
+	htimer11.Init.Prescaler = 10000 - 1; // 100 MHz / 10000 = 10 kHz or 10000Hz timer clock
+	htimer11.Init.Period = 1000 - 1;    // 1000 ticks = 100 ms delay
 
 	if (HAL_TIM_Base_Init(&htimer11) != HAL_OK) {
 		Error_Handler();
