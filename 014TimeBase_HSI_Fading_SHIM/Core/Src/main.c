@@ -22,14 +22,13 @@ int main(void) {
 	 * VERY DIM        = 5 (2%)
 	 * MEDIUM          = 125 (50%)
 	 * FULL BRIGHTNESS = 245 (100%) */
-	uint16_t brightness = 125;
+	uint16_t brightness = 5;
+	int8_t step = 1;
+	uint16_t slow_down_counter = 0;
 
 	while (1) {
 		if (brightness >= 245) {
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-			if (TIM11->SR & TIM_SR_UIF) {
-				TIM11->SR = ~TIM_SR_UIF;
-			}
 		} else {
 			// At the very start of the cycle turn the LED ON
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
@@ -39,10 +38,30 @@ int main(void) {
 
 			// Threshold reached! Turn the LED OFF (Pull HIGH)
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
+		}
 
-			// Wait for the complete 0.25ms period to finish
-			while (!(TIM11->SR & TIM_SR_UIF));
-			TIM11->SR = ~TIM_SR_UIF; // Clear the flag for the next cycle
+		// Wait for the complete 0.25ms period to finish
+		while (!(TIM11->SR & TIM_SR_UIF));
+		TIM11->SR = ~TIM_SR_UIF; // Clear the flag for the next cycle
+
+		/* Choose any speed for fading
+		 * 40 is quite slow
+		 * 20 is MEDIUM
+		 * 10 is quick
+		 * 5 is blinking */
+		slow_down_counter++;
+
+		if (slow_down_counter >= 20) {
+			slow_down_counter = 0;
+			brightness += step;
+
+			if (brightness >= 245) {
+				brightness = 245;
+				step = -1;
+			} else if (brightness <= 5) {
+				brightness = 5;
+				step = 1;
+			}
 		}
 	}
 
