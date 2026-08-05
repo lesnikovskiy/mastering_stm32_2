@@ -20,10 +20,12 @@ int main(void) {
 		// Loop until the update event flag is set
 		while (!(TIM11->SR & TIM_SR_UIF));
 
+		// Clear the flag correctly so the timer waits on the next loop
+		TIM11->SR = ~TIM_SR_UIF;
+
 		/* The required time delay has been elapsed */
 		/* User code can be executed */
 		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-		TIM11->SR |= 0 << 1;
 	}
 
 	return 0;
@@ -79,16 +81,14 @@ void GPIO_Init(void) {
 
 void TIM11_Init(void) {
 	htimer11.Instance = TIM11;
-// CounterMode is always default for Basic Timers and cannot be changed
+	/* CounterMode is always default for Basic Timers and cannot be changed */
 	htimer11.Init.CounterMode = TIM_COUNTERMODE_UP;
-// CNT_CLK = TIMxCLK from RCC
-// CNT_CLK = TIMx_CLK / (prescaler + 1)
-// HSE CNT_CLK = 25 / (1 + 1) = 12
-// Range 0x00 to 0xFFFF (16bit)
-	htimer11.Init.Prescaler = 999;
-// if value 0 timer won't start
-// we need -1 to get the exact count as it will take +1 more
-	htimer11.Init.Period = 10000 - 1;
+	htimer11.Init.Prescaler = 100 - 1; // 100 MHz / 100 = 1 MHz timer clock
+	htimer11.Init.Period = 250 - 1;    // 250 ticks = 0.25 ms delay
+
+	/* Uncomment to see LED blinking */
+	htimer11.Init.Prescaler = 1000 - 1; // Slow down timer clock to 100 kHz
+	htimer11.Init.Period = 50000 - 1;   // 50,000 ticks = 500 ms (0.5 seconds)
 
 	if (HAL_TIM_Base_Init(&htimer11) != HAL_OK) {
 		Error_Handler();
