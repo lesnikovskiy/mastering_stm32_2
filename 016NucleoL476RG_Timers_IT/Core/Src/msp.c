@@ -22,7 +22,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htimer) {
 		HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
 
 		// Setup the priority for TIM6_DAC_IRQn
-		HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 15, 0);
+		HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 0, 0);
 	}
 
 }
