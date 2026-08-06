@@ -15,18 +15,9 @@ int main(void) {
 	GPIO_Init();
 	TIM6_Init();
 
-	HAL_TIM_Base_Start(&htimer6);
+	HAL_TIM_Base_Start_IT(&htimer6);
 
-	while (1) {
-		// Loop until the update flag is set
-		while (!(TIM6->SR & TIM_SR_UIF));
-
-		// Clear the flag set by hardware should be cleared by soft
-		TIM6->SR = ~TIM_SR_UIF;
-
-		// Toggle PIN 5
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	}
+	while (1);
 
 	return 0;
 }
@@ -94,6 +85,17 @@ void TIM6_Init(void) {
 
 	if (HAL_TIM_Base_Init(&htimer6) != HAL_OK) {
 		Error_Handler();
+	}
+}
+
+void TIM6_DAC_IRQHandler(void) {
+	// HAL cleans the UIF flag automatically
+	HAL_TIM_IRQHandler(&htimer6);
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	if (htim->Instance == TIM6) {
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 	}
 }
 
