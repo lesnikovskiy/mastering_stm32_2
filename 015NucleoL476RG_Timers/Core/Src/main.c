@@ -41,9 +41,10 @@ void SystemClock_Config(void) {
 		Error_Handler();
 	}
 
-	osc_init.OscillatorType = RCC_OSCILLATORTYPE_MSI;
+	osc_init.OscillatorType = RCC_OSCILLATORTYPE_MSI | RCC_OSCILLATORTYPE_LSE;
 	osc_init.HSIState = RCC_HSI_OFF;
 	osc_init.HSI48State = RCC_HSI48_OFF;
+	osc_init.LSEState = RCC_LSE_ON;
 	osc_init.MSIState = RCC_MSI_ON;
 	osc_init.MSICalibrationValue = 0;
 	osc_init.MSIClockRange = RCC_MSIRANGE_6; // 4MHz
@@ -58,6 +59,8 @@ void SystemClock_Config(void) {
 	if (HAL_RCC_OscConfig(&osc_init) != HAL_OK) {
 		Error_Handler();
 	}
+
+	HAL_RCCEx_EnableMSIPLLMode();
 
 	clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1
 			| RCC_CLOCKTYPE_PCLK2;
