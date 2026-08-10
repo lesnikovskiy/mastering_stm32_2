@@ -16,18 +16,9 @@ int main(void) {
 	TIM11_Init();
 
 	// Let's start the timer
-	HAL_TIM_Base_Start(&htimer11);
+	HAL_TIM_Base_Start_IT(&htimer11);
 
-	while (1) {
-		// Loop until the update event flag is set
-		while (!(TIM11->SR & TIM_SR_UIF));
-
-		// Clear the flag correctly so the timer waits on the next loop
-		TIM11->SR = ~TIM_SR_UIF;
-
-		// Toggle pin 13
-		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-	}
+	while (1);
 
 	return 0;
 }
@@ -56,6 +47,13 @@ void TIM11_Init(void) {
 
 	if (HAL_TIM_Base_Init(&htimer11) != HAL_OK) {
 		Error_Handler();
+	}
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	if (htim->Instance == TIM11) {
+		// Toggle pin 13
+		GPIOC->ODR ^= GPIO_PIN_13;
 	}
 }
 
