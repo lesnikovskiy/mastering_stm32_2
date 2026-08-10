@@ -90,7 +90,7 @@ void TIM6_Init(void) {
 
 void TIM6_DAC_IRQHandler(void) {
 	// Optimize the code for performance
-	// Remove HAL and manualy toggle LED and clean UIF flag
+	// Remove HAL and manually toggle LED and clean UIF flag
 	GPIOA->ODR ^= GPIO_PIN_5;
 
 	TIM6->SR = ~TIM_SR_UIF;
