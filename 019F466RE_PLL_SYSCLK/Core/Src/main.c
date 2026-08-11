@@ -14,7 +14,7 @@ char *greeting_message = "The application is running on NUCLEO-F446RE\r\n";
 int main(void) {
 	HAL_Init();
 
-	SystemClock_Config(1);
+	SystemClock_Config(SYS_CLK_FREQ_50_MHZ);
 
 	HAL_GPIO_MspInit();
 
@@ -178,7 +178,7 @@ void TIM6_Init(void) {
 	timer6.Instance = TIM6;
 
 	timer6.Init.CounterMode = TIM_COUNTERMODE_UP;
-	timer6.Init.Period = 50000 - 1;
+	timer6.Init.Period = 5000 - 1;
 	timer6.Init.Prescaler = 999 - 1;
 
 	if (HAL_TIM_Base_Init(&timer6) != HAL_OK) {
