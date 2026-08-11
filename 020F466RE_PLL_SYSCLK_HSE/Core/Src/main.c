@@ -14,13 +14,13 @@ char *greeting_message = "The application is running on NUCLEO-F446RE\r\n";
 int main(void) {
 	HAL_Init();
 
-	SystemClock_Config_HSE(SYS_CLK_FREQ_50_MHZ);
-
-	HAL_GPIO_MspInit();
+	SystemClock_Config_HSE(SYS_CLK_FREQ_180_MHZ);
 
 	UART2_Init();
 
-	TIM6_Init(SYS_CLK_FREQ_50_MHZ);
+	TIM6_Init(SYS_CLK_FREQ_180_MHZ);
+
+	HAL_GPIO_MspInit();
 
 	HAL_UART_Transmit(&huart2, (uint8_t*) greeting_message, strlen(greeting_message),
 	HAL_MAX_DELAY);
@@ -49,9 +49,6 @@ void SystemClock_Config_HSE(uint8_t clock_freq) {
 	RCC_ClkInitTypeDef clk_init = { 0 };
 
 	uint8_t flash_latency = 0;
-
-	// Enable Power Control clock to modify voltage regulators for 180MHz
-	__HAL_RCC_PWR_CLK_ENABLE();
 
 	osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSE;
 	osc_init.HSEState = RCC_HSE_ON;
@@ -109,7 +106,13 @@ void SystemClock_Config_HSE(uint8_t clock_freq) {
 
 		break;
 	}
-	default: {
+	case SYS_CLK_FREQ_180_MHZ: {
+		// Enable clock for the power controller
+		__HAL_RCC_PWR_CLK_ENABLE();
+
+		// Set regulator voltage scale as 1
+		__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
 		osc_init.PLL.PLLM = 8;
 		osc_init.PLL.PLLN = 360;
 		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
@@ -124,6 +127,9 @@ void SystemClock_Config_HSE(uint8_t clock_freq) {
 
 		break;
 	}
+	default: {
+		break;
+	}
 	}
 
 	if (HAL_RCC_OscConfig(&osc_init) != HAL_OK) {
@@ -131,8 +137,7 @@ void SystemClock_Config_HSE(uint8_t clock_freq) {
 	}
 
 	// CRITICAL: Activate Over-Drive mode to allow frequencies above 168 MHz
-	if (clock_freq != SYS_CLK_FREQ_50_MHZ && clock_freq != SYS_CLK_FREQ_84_MHZ
-			&& clock_freq != SYS_CLK_FREQ_120_MHZ) {
+	if (clock_freq == SYS_CLK_FREQ_180_MHZ) {
 		if (HAL_PWREx_EnableOverDrive() != HAL_OK) {
 			Error_Handler();
 		}
@@ -195,9 +200,12 @@ void TIM6_Init(uint8_t clock_freq) {
 		timer6.Init.Prescaler = 999 - 1;
 		break;
 	}
-	default: {
+	case SYS_CLK_FREQ_180_MHZ: {
 		timer6.Init.Period = 9000 - 1;
 		timer6.Init.Prescaler = 999 - 1;
+		break;
+	}
+	default: {
 		break;
 	}
 	}
