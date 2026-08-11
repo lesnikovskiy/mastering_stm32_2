@@ -14,7 +14,7 @@ char *greeting_message = "The application is running on NUCLEO-F446RE\r\n";
 int main(void) {
 	HAL_Init();
 
-	SystemClock_Config(SYS_CLK_FREQ_84_MHZ);
+	SystemClock_Config(1);
 
 	HAL_GPIO_MspInit();
 
@@ -50,6 +50,9 @@ void SystemClock_Config(uint8_t clock_freq) {
 
 	uint8_t flash_latency = 0;
 
+	// Enable Power Control clock to modify voltage regulators for 180MHz
+	__HAL_RCC_PWR_CLK_ENABLE();
+
 	osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSI;
 	osc_init.HSIState = RCC_HSI_ON;
 	osc_init.HSICalibrationValue = 16;
@@ -70,9 +73,9 @@ void SystemClock_Config(uint8_t clock_freq) {
 
 		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
 		clk_init.APB1CLKDivider = RCC_HCLK_DIV2;
-		clk_init.APB2CLKDivider = RCC_HCLK_DIV1;
+		clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
 
-		flash_latency = FLASH_ACR_LATENCY_1WS;
+		flash_latency = FLASH_LATENCY_1;
 
 		break;
 	}
@@ -85,9 +88,9 @@ void SystemClock_Config(uint8_t clock_freq) {
 
 		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
 		clk_init.APB1CLKDivider = RCC_HCLK_DIV2;
-		clk_init.APB2CLKDivider = RCC_HCLK_DIV1;
+		clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
 
-		flash_latency = FLASH_ACR_LATENCY_2WS;
+		flash_latency = FLASH_LATENCY_2;
 
 		break;
 	}
@@ -102,17 +105,37 @@ void SystemClock_Config(uint8_t clock_freq) {
 		clk_init.APB1CLKDivider = RCC_HCLK_DIV4;
 		clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
 
-		flash_latency = FLASH_ACR_LATENCY_3WS;
+		flash_latency = FLASH_LATENCY_3;
 
 		break;
 	}
 	default: {
+		osc_init.PLL.PLLM = 16;
+		osc_init.PLL.PLLN = 360;
+		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
+		osc_init.PLL.PLLR = 2;
+		osc_init.PLL.PLLQ = 2;
 
+		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
+		clk_init.APB1CLKDivider = RCC_HCLK_DIV4;
+		clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
+
+		flash_latency = FLASH_LATENCY_5;
+
+		break;
 	}
 	}
 
 	if (HAL_RCC_OscConfig(&osc_init) != HAL_OK) {
 		Error_Handler();
+	}
+
+	// CRITICAL: Activate Over-Drive mode to allow frequencies above 168 MHz
+	if (clock_freq != SYS_CLK_FREQ_50_MHZ && clock_freq != SYS_CLK_FREQ_84_MHZ
+			&& clock_freq != SYS_CLK_FREQ_120_MHZ) {
+		if (HAL_PWREx_EnableOverDrive() != HAL_OK) {
+			Error_Handler();
+		}
 	}
 
 	if (HAL_RCC_ClockConfig(&clk_init, flash_latency) != HAL_OK) {
