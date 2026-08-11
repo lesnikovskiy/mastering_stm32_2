@@ -1,6 +1,6 @@
 #include "main.h"
 
-void SystemClock_Config(void);
+void SystemClock_Config_HSE(void);
 void GPIO_Init(void);
 void TIM11_Init(void);
 void Error_Handler(void);
@@ -9,7 +9,7 @@ TIM_HandleTypeDef htimer11;
 
 int main(void) {
 	HAL_Init();
-	SystemClock_Config();
+	SystemClock_Config_HSE();
 	GPIO_Init();
 	TIM11_Init();
 
@@ -31,7 +31,7 @@ int main(void) {
 	return 0;
 }
 
-void SystemClock_Config(void) {
+void SystemClock_Config_HSE(void) {
 	RCC_OscInitTypeDef osc_init = { 0 };
 	RCC_ClkInitTypeDef clk_init = { 0 };
 

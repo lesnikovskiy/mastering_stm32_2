@@ -1,6 +1,6 @@
 #include "main.h"
 
-void SystemClock_Config(void);
+void SystemClock_Config_HSE(void);
 void HAL_GPIO_MspInit(void);
 void UART2_Init(void);
 void TIM6_Init(void);
@@ -14,7 +14,7 @@ char *greeting_message = "The application is running on NUCLEO-F446RE\r\n";
 int main(void) {
 	HAL_Init();
 
-	SystemClock_Config();
+	SystemClock_Config_HSE();
 
 	HAL_GPIO_MspInit();
 
@@ -44,7 +44,7 @@ int main(void) {
 	return 0;
 }
 
-void SystemClock_Config(void) {
+void SystemClock_Config_HSE(void) {
 	RCC_OscInitTypeDef osc_init = { 0 };
 	RCC_ClkInitTypeDef clk_init = { 0 };
 
