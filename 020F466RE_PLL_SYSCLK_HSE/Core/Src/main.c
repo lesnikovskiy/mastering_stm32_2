@@ -3,7 +3,7 @@
 void SystemClock_Config_HSE(uint8_t clock_freq);
 void HAL_GPIO_MspInit(void);
 void UART2_Init(void);
-void TIM6_Init(void);
+void TIM6_Init(uint8_t clock_freq);
 void Error_Handler(void);
 
 UART_HandleTypeDef huart2;
@@ -20,7 +20,7 @@ int main(void) {
 
 	UART2_Init();
 
-	TIM6_Init();
+	TIM6_Init(SYS_CLK_FREQ_50_MHZ);
 
 	HAL_UART_Transmit(&huart2, (uint8_t*) greeting_message, strlen(greeting_message),
 	HAL_MAX_DELAY);
@@ -53,11 +53,11 @@ void SystemClock_Config_HSE(uint8_t clock_freq) {
 	// Enable Power Control clock to modify voltage regulators for 180MHz
 	__HAL_RCC_PWR_CLK_ENABLE();
 
-	osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-	osc_init.HSIState = RCC_HSI_ON;
-	osc_init.HSICalibrationValue = 16;
+	osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+	osc_init.HSEState = RCC_HSE_ON;
+	osc_init.HSIState = RCC_HSI_OFF;
 	osc_init.PLL.PLLState = RCC_PLL_ON;
-	osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+	osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSE;
 
 	clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1
 			| RCC_CLOCKTYPE_PCLK2;
@@ -65,7 +65,7 @@ void SystemClock_Config_HSE(uint8_t clock_freq) {
 
 	switch (clock_freq) {
 	case SYS_CLK_FREQ_50_MHZ: {
-		osc_init.PLL.PLLM = 16;
+		osc_init.PLL.PLLM = 8;
 		osc_init.PLL.PLLN = 100;
 		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 		osc_init.PLL.PLLR = 2;
@@ -80,7 +80,7 @@ void SystemClock_Config_HSE(uint8_t clock_freq) {
 		break;
 	}
 	case SYS_CLK_FREQ_84_MHZ: {
-		osc_init.PLL.PLLM = 16;
+		osc_init.PLL.PLLM = 8;
 		osc_init.PLL.PLLN = 168;
 		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 		osc_init.PLL.PLLR = 2;
@@ -95,7 +95,7 @@ void SystemClock_Config_HSE(uint8_t clock_freq) {
 		break;
 	}
 	case SYS_CLK_FREQ_120_MHZ: {
-		osc_init.PLL.PLLM = 16;
+		osc_init.PLL.PLLM = 8;
 		osc_init.PLL.PLLN = 240;
 		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 		osc_init.PLL.PLLR = 2;
@@ -110,7 +110,7 @@ void SystemClock_Config_HSE(uint8_t clock_freq) {
 		break;
 	}
 	default: {
-		osc_init.PLL.PLLM = 16;
+		osc_init.PLL.PLLM = 8;
 		osc_init.PLL.PLLN = 360;
 		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 		osc_init.PLL.PLLR = 2;
@@ -174,12 +174,33 @@ void UART2_Init(void) {
 	}
 }
 
-void TIM6_Init(void) {
+void TIM6_Init(uint8_t clock_freq) {
 	timer6.Instance = TIM6;
 
 	timer6.Init.CounterMode = TIM_COUNTERMODE_UP;
-	timer6.Init.Period = 5000 - 1;
-	timer6.Init.Prescaler = 999 - 1;
+
+	switch (clock_freq) {
+	case SYS_CLK_FREQ_50_MHZ: {
+		timer6.Init.Period = 5000 - 1;
+		timer6.Init.Prescaler = 999 - 1;
+		break;
+	}
+	case SYS_CLK_FREQ_84_MHZ: {
+		timer6.Init.Period = 8400 - 1;
+		timer6.Init.Prescaler = 999 - 1;
+		break;
+	}
+	case SYS_CLK_FREQ_120_MHZ: {
+		timer6.Init.Period = 6000 - 1;
+		timer6.Init.Prescaler = 999 - 1;
+		break;
+	}
+	default: {
+		timer6.Init.Period = 9000 - 1;
+		timer6.Init.Prescaler = 999 - 1;
+		break;
+	}
+	}
 
 	if (HAL_TIM_Base_Init(&timer6) != HAL_OK) {
 		Error_Handler();
