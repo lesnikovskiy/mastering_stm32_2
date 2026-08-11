@@ -22,8 +22,9 @@ int main(void) {
 
 	TIM6_Init();
 
-	HAL_UART_Transmit(&huart2, (uint8_t*) greeting_message, strlen(greeting_message),
-	HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart2, (uint8_t*) greeting_message,
+			strlen(greeting_message),
+			HAL_MAX_DELAY);
 
 	char msg[100];
 
@@ -39,7 +40,8 @@ int main(void) {
 	snprintf(msg, sizeof(msg), "PCLK2 : %luHz\r\n", HAL_RCC_GetPCLK2Freq());
 	HAL_UART_Transmit(&huart2, (uint8_t*) msg, strlen(msg), HAL_MAX_DELAY);
 
-	while (1);
+	while (1)
+		;
 
 	return 0;
 }
@@ -59,8 +61,8 @@ void SystemClock_Config_HSE(uint8_t clock_freq) {
 	osc_init.PLL.PLLState = RCC_PLL_ON;
 	osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSI;
 
-	clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1
-			| RCC_CLOCKTYPE_PCLK2;
+	clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK
+			| RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 	clk_init.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
 
 	switch (clock_freq) {
@@ -199,5 +201,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 void Error_Handler(void) {
 	__disable_irq();
 
-	while (1);
+	while (1)
+		;
 }
