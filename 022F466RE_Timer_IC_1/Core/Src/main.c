@@ -3,7 +3,7 @@
 void SystemClock_Config(uint8_t clock_freq);
 void Timer2_Init(void);
 void HAL_GPIO_MspInit(void);
-void LSE_Configuration(void);
+void MSO_Configuration(void);
 void Error_Handler(void);
 
 TIM_HandleTypeDef htimer2;
@@ -15,7 +15,7 @@ int main(void) {
 
 	Timer2_Init();
 
-	LSE_Configuration();
+	MSO_Configuration();
 
 	HAL_GPIO_MspInit();
 
@@ -33,8 +33,9 @@ void SystemClock_Config(uint8_t clock_freq) {
 	// Enable Power Control clock to modify voltage regulators for 180MHz
 	__HAL_RCC_PWR_CLK_ENABLE();
 
-	osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+	osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSE;
 	osc_init.HSIState = RCC_HSI_ON;
+	osc_init.LSEState = RCC_LSE_ON;
 	osc_init.HSICalibrationValue = 0;
 	osc_init.PLL.PLLState = RCC_PLL_ON;
 	osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSI;
@@ -141,16 +142,7 @@ void Timer2_Init(void) {
 	}
 }
 
-void LSE_Configuration(void) {
-	RCC_OscInitTypeDef osc_init = { 0 };
-
-	osc_init.OscillatorType = RCC_OSCILLATORTYPE_LSE;
-	osc_init.LSEState = RCC_LSE_ON;
-
-	if (HAL_RCC_OscConfig(&osc_init) != HAL_OK) {
-		Error_Handler();
-	}
-
+void MSO_Configuration(void) {
 	HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_LSE, RCC_MCODIV_1);
 }
 
