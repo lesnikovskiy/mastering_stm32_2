@@ -3,6 +3,7 @@
 void SystemClock_Config(uint8_t clock_freq);
 void Timer2_Init(void);
 void HAL_GPIO_MspInit(void);
+void LSE_Configuration(void);
 void Error_Handler(void);
 
 TIM_HandleTypeDef htimer2;
@@ -13,6 +14,8 @@ int main(void) {
 	SystemClock_Config(SYS_CLK_FREQ_50_MHZ);
 
 	Timer2_Init();
+
+	LSE_Configuration();
 
 	HAL_GPIO_MspInit();
 
@@ -136,6 +139,19 @@ void Timer2_Init(void) {
 	if (HAL_TIM_IC_Start_IT(&htimer2, TIM_CHANNEL_1) != HAL_OK) {
 		Error_Handler();
 	}
+}
+
+void LSE_Configuration(void) {
+	RCC_OscInitTypeDef osc_init = { 0 };
+
+	osc_init.OscillatorType = RCC_OSCILLATORTYPE_LSE;
+	osc_init.LSEState = RCC_LSE_ON;
+
+	if (HAL_RCC_OscConfig(&osc_init) != HAL_OK) {
+		Error_Handler();
+	}
+
+	HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_LSE, RCC_MCODIV_1);
 }
 
 void HAL_GPIO_MspInit(void) {
