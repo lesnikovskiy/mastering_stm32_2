@@ -2,13 +2,27 @@
 
 void SystemClock_Config(uint8_t clock_freq);
 void Timer2_Init(void);
+void UART2_Init(void);
 void HAL_GPIO_MspInit(void);
 void MSO_Configuration(void);
 void Error_Handler(void);
 
+UART_HandleTypeDef huart2;
 TIM_HandleTypeDef htimer2;
 
+uint32_t input_captures[2] = { 0 };
+uint8_t count = 1;
+uint8_t is_capture_done = FALSE;
+
 int main(void) {
+	uint32_t capture_difference = 0;
+	double timer2_cnt_freq = 0;
+	double timer2_cnt_res = 0;
+	double user_signal_time_period = 0;
+	double user_signal_freq = 0;
+
+	char usr_msg[100];
+
 	HAL_Init();
 
 	SystemClock_Config(SYS_CLK_FREQ_50_MHZ);
@@ -17,9 +31,34 @@ int main(void) {
 
 	MSO_Configuration();
 
+	UART2_Init();
 	HAL_GPIO_MspInit();
 
-	while (1);
+	if (HAL_TIM_IC_Start_IT(&htimer2, TIM_CHANNEL_1) != HAL_OK) {
+		Error_Handler();
+	}
+
+	while (1) {
+		if (is_capture_done) {
+			if (input_captures[1] > input_captures[0]) {
+				capture_difference = input_captures[1] - input_captures[0];
+			} else {
+				capture_difference = (0xFFFFFFFF - input_captures[0]) + input_captures[1];
+			}
+
+			timer2_cnt_freq = (double) (HAL_RCC_GetPCLK1Freq() * 2) / (htimer2.Init.Prescaler + 1);
+			timer2_cnt_res = 1 / timer2_cnt_freq;
+			user_signal_time_period = capture_difference * timer2_cnt_res;
+			user_signal_freq = 1 / user_signal_time_period;
+
+			snprintf(usr_msg, sizeof(usr_msg), "Frequency of the signal applied = %f\r\n",
+					user_signal_freq);
+
+			HAL_UART_Transmit(&huart2, (uint8_t*) usr_msg, strlen(usr_msg), HAL_MAX_DELAY);
+
+			is_capture_done = FALSE;
+		}
+	}
 
 	return 0;
 }
@@ -36,7 +75,7 @@ void SystemClock_Config(uint8_t clock_freq) {
 	osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSE;
 	osc_init.HSIState = RCC_HSI_ON;
 	osc_init.LSEState = RCC_LSE_ON;
-	osc_init.HSICalibrationValue = 0;
+	osc_init.HSICalibrationValue = 16;
 	osc_init.PLL.PLLState = RCC_PLL_ON;
 	osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSI;
 
@@ -136,14 +175,25 @@ void Timer2_Init(void) {
 	if (HAL_TIM_IC_ConfigChannel(&htimer2, &timer2IC_config, TIM_CHANNEL_1) != HAL_OK) {
 		Error_Handler();
 	}
-
-	if (HAL_TIM_IC_Start_IT(&htimer2, TIM_CHANNEL_1) != HAL_OK) {
-		Error_Handler();
-	}
 }
 
 void MSO_Configuration(void) {
 	HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_LSE, RCC_MCODIV_1);
+}
+
+void UART2_Init(void) {
+	huart2.Instance = USART2;
+	huart2.Init.BaudRate = 115200;
+	huart2.Init.WordLength = UART_WORDLENGTH_8B;
+	huart2.Init.StopBits = UART_STOPBITS_1;
+	huart2.Init.Parity = UART_PARITY_NONE;
+	huart2.Init.Mode = UART_MODE_TX_RX;
+	huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+
+	if (HAL_UART_Init(&huart2) != HAL_OK) {
+		Error_Handler();
+	}
 }
 
 void HAL_GPIO_MspInit(void) {
@@ -156,6 +206,19 @@ void HAL_GPIO_MspInit(void) {
 	gpio.Speed = GPIO_SPEED_FREQ_HIGH;
 
 	HAL_GPIO_Init(GPIOA, &gpio);
+}
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
+	if (!is_capture_done) {
+		if (count == 1) {
+			input_captures[0] = __HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_1);
+			count++;
+		} else if (count == 2) {
+			input_captures[1] = __HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_1);
+			count = 1;
+			is_capture_done = TRUE;
+		}
+	}
 }
 
 void Error_Handler(void) {

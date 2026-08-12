@@ -34,3 +34,21 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef *htim) {
 	HAL_NVIC_EnableIRQ(TIM2_IRQn);
 	HAL_NVIC_SetPriority(TIM2_IRQn, 15, 0);
 }
+
+void HAL_UART_MspInit(UART_HandleTypeDef *huart) {
+	// Enable the Clock for USART2 Peripheral
+	__HAL_RCC_USART2_CLK_ENABLE();
+
+	GPIO_InitTypeDef gpio_uart = { 0 };
+	gpio_uart.Pin = GPIO_PIN_2 | GPIO_PIN_3;
+	gpio_uart.Mode = GPIO_MODE_AF_PP;
+	gpio_uart.Pull = GPIO_PULLUP;
+	gpio_uart.Speed = GPIO_SPEED_FREQ_HIGH;
+	gpio_uart.Alternate = GPIO_AF7_USART2;
+
+	HAL_GPIO_Init(GPIOA, &gpio_uart);
+
+	// Enable IRQ and set the priority (NVIC Settings)
+	HAL_NVIC_SetPriority(USART2_IRQn, 15, 0);
+	HAL_NVIC_EnableIRQ(USART2_IRQn);
+}
