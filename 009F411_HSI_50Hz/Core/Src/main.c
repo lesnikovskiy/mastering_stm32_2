@@ -4,7 +4,7 @@
 #define SYS_CLOCK_FREQ_84MHZ    84
 #define SYS_CLOCK_FREQ_100MHZ   100
 
-void SystemClock_Config_HSE(uint8_t clock_freq);
+void SystemClock_Config(uint8_t clock_freq);
 void HAL_GPIO_MspInit(void);
 void UART1_Init(void);
 void Error_Handler(void);
@@ -16,7 +16,7 @@ char *greeting_message = "The application is running on STM32F411CEU6\r\n";
 int main(void) {
 	HAL_Init();
 
-	SystemClock_Config_HSE(SYS_CLOCK_FREQ_84MHZ);
+	SystemClock_Config(SYS_CLOCK_FREQ_84MHZ);
 
 	HAL_GPIO_MspInit();
 
@@ -46,7 +46,7 @@ int main(void) {
 	return 0;
 }
 
-void SystemClock_Config_HSE(uint8_t clock_freq) {
+void SystemClock_Config(uint8_t clock_freq) {
 	RCC_OscInitTypeDef osc_init = { 0 };
 	RCC_ClkInitTypeDef clk_init = { 0 };
 

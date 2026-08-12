@@ -1,20 +1,17 @@
 #include "main.h"
 
-void SystemClock_Config_HSE(uint8_t clock_freq);
+void SystemClock_Config(uint8_t clock_freq);
 void HAL_GPIO_MspInit(void);
-void TIM6_Init(void);
 void Error_Handler(void);
 
-TIM_HandleTypeDef timer6;
+TIM_HandleTypeDef timer2;
 
 char *greeting_message = "The application is running on NUCLEO-F446RE\r\n";
 
 int main(void) {
 	HAL_Init();
 
-	SystemClock_Config_HSE(SYS_CLK_FREQ_50_MHZ);
-
-	TIM6_Init();
+	SystemClock_Config(SYS_CLK_FREQ_50_MHZ);
 
 	HAL_GPIO_MspInit();
 
@@ -23,7 +20,7 @@ int main(void) {
 	return 0;
 }
 
-void SystemClock_Config_HSE(uint8_t clock_freq) {
+void SystemClock_Config(uint8_t clock_freq) {
 	RCC_OscInitTypeDef osc_init = { 0 };
 	RCC_ClkInitTypeDef clk_init = { 0 };
 
@@ -34,7 +31,7 @@ void SystemClock_Config_HSE(uint8_t clock_freq) {
 
 	osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSI;
 	osc_init.HSIState = RCC_HSI_ON;
-	osc_init.HSICalibrationValue = 16;
+	osc_init.HSICalibrationValue = 0;
 	osc_init.PLL.PLLState = RCC_PLL_ON;
 	osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSI;
 
@@ -43,54 +40,54 @@ void SystemClock_Config_HSE(uint8_t clock_freq) {
 	clk_init.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
 
 	switch (clock_freq) {
-	case SYS_CLK_FREQ_50_MHZ: {
-		osc_init.PLL.PLLM = 16;
-		osc_init.PLL.PLLN = 100;
-		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
-		osc_init.PLL.PLLR = 2;
-		osc_init.PLL.PLLQ = 2;
+		case SYS_CLK_FREQ_50_MHZ: {
+			osc_init.PLL.PLLM = 16;
+			osc_init.PLL.PLLN = 100;
+			osc_init.PLL.PLLP = RCC_PLLP_DIV2;
+			osc_init.PLL.PLLR = 2;
+			osc_init.PLL.PLLQ = 2;
 
-		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
-		clk_init.APB1CLKDivider = RCC_HCLK_DIV2;
-		clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
+			clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
+			clk_init.APB1CLKDivider = RCC_HCLK_DIV2;
+			clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
 
-		flash_latency = FLASH_LATENCY_1;
+			flash_latency = FLASH_LATENCY_1;
 
-		break;
-	}
-	case SYS_CLK_FREQ_84_MHZ: {
-		osc_init.PLL.PLLM = 16;
-		osc_init.PLL.PLLN = 168;
-		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
-		osc_init.PLL.PLLR = 2;
-		osc_init.PLL.PLLQ = 2;
+			break;
+		}
+		case SYS_CLK_FREQ_84_MHZ: {
+			osc_init.PLL.PLLM = 16;
+			osc_init.PLL.PLLN = 168;
+			osc_init.PLL.PLLP = RCC_PLLP_DIV2;
+			osc_init.PLL.PLLR = 2;
+			osc_init.PLL.PLLQ = 2;
 
-		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
-		clk_init.APB1CLKDivider = RCC_HCLK_DIV2;
-		clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
+			clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
+			clk_init.APB1CLKDivider = RCC_HCLK_DIV2;
+			clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
 
-		flash_latency = FLASH_LATENCY_2;
+			flash_latency = FLASH_LATENCY_2;
 
-		break;
-	}
-	case SYS_CLK_FREQ_120_MHZ: {
-		osc_init.PLL.PLLM = 16;
-		osc_init.PLL.PLLN = 240;
-		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
-		osc_init.PLL.PLLR = 2;
-		osc_init.PLL.PLLQ = 2;
+			break;
+		}
+		case SYS_CLK_FREQ_120_MHZ: {
+			osc_init.PLL.PLLM = 16;
+			osc_init.PLL.PLLN = 240;
+			osc_init.PLL.PLLP = RCC_PLLP_DIV2;
+			osc_init.PLL.PLLR = 2;
+			osc_init.PLL.PLLQ = 2;
 
-		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
-		clk_init.APB1CLKDivider = RCC_HCLK_DIV4;
-		clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
+			clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
+			clk_init.APB1CLKDivider = RCC_HCLK_DIV4;
+			clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
 
-		flash_latency = FLASH_LATENCY_3;
+			flash_latency = FLASH_LATENCY_3;
 
-		break;
-	}
-	default: {
-		break;
-	}
+			break;
+		}
+		default: {
+			break;
+		}
 	}
 
 	if (HAL_RCC_OscConfig(&osc_init) != HAL_OK) {
@@ -124,29 +121,6 @@ void HAL_GPIO_MspInit(void) {
 	gpio.Speed = GPIO_SPEED_FREQ_HIGH;
 
 	HAL_GPIO_Init(GPIOA, &gpio);
-}
-
-void TIM6_Init(void) {
-	timer6.Instance = TIM6;
-
-	timer6.Init.CounterMode = TIM_COUNTERMODE_UP;
-
-	timer6.Init.Prescaler = 9;
-	timer6.Init.Period = 50 - 1;
-
-	if (HAL_TIM_Base_Init(&timer6) != HAL_OK) {
-		Error_Handler();
-	}
-
-	if (HAL_TIM_Base_Start_IT(&timer6) != HAL_OK) {
-		Error_Handler();
-	}
-}
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	if (htim->Instance == TIM6) {
-		GPIOA->ODR ^= GPIO_PIN_5;
-	}
 }
 
 void Error_Handler(void) {

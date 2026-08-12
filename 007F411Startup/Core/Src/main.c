@@ -1,6 +1,6 @@
 #include "main.h"
 
-void SystemClock_Config_HSE(void);
+void SystemClock_Config(void);
 void HAL_GPIO_MspInit(void);
 void UART1_Init(void);
 void Error_Handler(void);
@@ -12,7 +12,7 @@ char *greeting_message = "The application is running on STM32F411CEU6\r\n";
 int main(void) {
 	HAL_Init();
 
-	SystemClock_Config_HSE();
+	SystemClock_Config();
 
 	HAL_GPIO_MspInit();
 
@@ -42,7 +42,7 @@ int main(void) {
 	return 0;
 }
 
-void SystemClock_Config_HSE(void) {
+void SystemClock_Config(void) {
 	RCC_OscInitTypeDef osc_init = { 0 };
 	RCC_ClkInitTypeDef clk_init = { 0 };
 
