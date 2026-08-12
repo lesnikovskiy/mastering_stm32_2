@@ -43,54 +43,54 @@ void SystemClock_Config_HSE(uint8_t clock_freq) {
 	clk_init.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
 
 	switch (clock_freq) {
-	case SYS_CLK_FREQ_50_MHZ: {
-		osc_init.PLL.PLLM = 16;
-		osc_init.PLL.PLLN = 100;
-		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
-		osc_init.PLL.PLLR = 2;
-		osc_init.PLL.PLLQ = 2;
+		case SYS_CLK_FREQ_50_MHZ: {
+			osc_init.PLL.PLLM = 16;
+			osc_init.PLL.PLLN = 100;
+			osc_init.PLL.PLLP = RCC_PLLP_DIV2;
+			osc_init.PLL.PLLR = 2;
+			osc_init.PLL.PLLQ = 2;
 
-		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
-		clk_init.APB1CLKDivider = RCC_HCLK_DIV2;
-		clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
+			clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
+			clk_init.APB1CLKDivider = RCC_HCLK_DIV2;
+			clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
 
-		flash_latency = FLASH_LATENCY_1;
+			flash_latency = FLASH_LATENCY_1;
 
-		break;
-	}
-	case SYS_CLK_FREQ_84_MHZ: {
-		osc_init.PLL.PLLM = 16;
-		osc_init.PLL.PLLN = 168;
-		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
-		osc_init.PLL.PLLR = 2;
-		osc_init.PLL.PLLQ = 2;
+			break;
+		}
+		case SYS_CLK_FREQ_84_MHZ: {
+			osc_init.PLL.PLLM = 16;
+			osc_init.PLL.PLLN = 168;
+			osc_init.PLL.PLLP = RCC_PLLP_DIV2;
+			osc_init.PLL.PLLR = 2;
+			osc_init.PLL.PLLQ = 2;
 
-		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
-		clk_init.APB1CLKDivider = RCC_HCLK_DIV2;
-		clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
+			clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
+			clk_init.APB1CLKDivider = RCC_HCLK_DIV2;
+			clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
 
-		flash_latency = FLASH_LATENCY_2;
+			flash_latency = FLASH_LATENCY_2;
 
-		break;
-	}
-	case SYS_CLK_FREQ_120_MHZ: {
-		osc_init.PLL.PLLM = 16;
-		osc_init.PLL.PLLN = 240;
-		osc_init.PLL.PLLP = RCC_PLLP_DIV2;
-		osc_init.PLL.PLLR = 2;
-		osc_init.PLL.PLLQ = 2;
+			break;
+		}
+		case SYS_CLK_FREQ_120_MHZ: {
+			osc_init.PLL.PLLM = 16;
+			osc_init.PLL.PLLN = 240;
+			osc_init.PLL.PLLP = RCC_PLLP_DIV2;
+			osc_init.PLL.PLLR = 2;
+			osc_init.PLL.PLLQ = 2;
 
-		clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
-		clk_init.APB1CLKDivider = RCC_HCLK_DIV4;
-		clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
+			clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
+			clk_init.APB1CLKDivider = RCC_HCLK_DIV4;
+			clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
 
-		flash_latency = FLASH_LATENCY_3;
+			flash_latency = FLASH_LATENCY_3;
 
-		break;
-	}
-	default: {
-		break;
-	}
+			break;
+		}
+		default: {
+			break;
+		}
 	}
 
 	if (HAL_RCC_OscConfig(&osc_init) != HAL_OK) {
