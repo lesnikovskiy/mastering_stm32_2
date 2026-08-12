@@ -1,17 +1,18 @@
 #include "main.h"
 
 void SystemClock_Config(uint8_t clock_freq);
+void Timer2_Init(void);
 void HAL_GPIO_MspInit(void);
 void Error_Handler(void);
 
-TIM_HandleTypeDef timer2;
-
-char *greeting_message = "The application is running on NUCLEO-F446RE\r\n";
+TIM_HandleTypeDef htimer2;
 
 int main(void) {
 	HAL_Init();
 
 	SystemClock_Config(SYS_CLK_FREQ_50_MHZ);
+
+	Timer2_Init();
 
 	HAL_GPIO_MspInit();
 
@@ -109,6 +110,32 @@ void SystemClock_Config(uint8_t clock_freq) {
 	// SYS_Tick configuration
 	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
 	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+}
+
+void Timer2_Init(void) {
+	TIM_IC_InitTypeDef timer2IC_config;
+
+	htimer2.Instance = TIM2;
+	htimer2.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htimer2.Init.Period = 0xFFFFFFFF;
+	htimer2.Init.Prescaler = 1;
+
+	if (HAL_TIM_IC_Init(&htimer2) != HAL_OK) {
+		Error_Handler();
+	}
+
+	timer2IC_config.ICFilter = 0;
+	timer2IC_config.ICPolarity = TIM_ICPOLARITY_RISING;
+	timer2IC_config.ICPrescaler = TIM_ICPSC_DIV1;
+	timer2IC_config.ICSelection = TIM_ICSELECTION_DIRECTTI;
+
+	if (HAL_TIM_IC_ConfigChannel(&htimer2, &timer2IC_config, TIM_CHANNEL_1) != HAL_OK) {
+		Error_Handler();
+	}
+
+	if (HAL_TIM_IC_Start_IT(&htimer2, TIM_CHANNEL_1) != HAL_OK) {
+		Error_Handler();
+	}
 }
 
 void HAL_GPIO_MspInit(void) {

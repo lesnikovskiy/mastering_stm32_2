@@ -17,8 +17,7 @@ int main(void) {
 
 	HAL_TIM_Base_Start_IT(&htimer6);
 
-	while (1)
-		;
+	while (1);
 
 	return 0;
 }
@@ -29,8 +28,7 @@ void SystemClock_Config(void) {
 
 	// This is critical for L Series
 	__HAL_RCC_PWR_CLK_ENABLE();
-	if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1)
-			!= HAL_OK) {
+	if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK) {
 		Error_Handler();
 	}
 
@@ -55,8 +53,8 @@ void SystemClock_Config(void) {
 
 	HAL_RCCEx_EnableMSIPLLMode();
 
-	clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK
-			| RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+	clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1
+			| RCC_CLOCKTYPE_PCLK2;
 	clk_init.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
 	clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
 	clk_init.APB1CLKDivider = RCC_HCLK_DIV1;
@@ -105,6 +103,5 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 void Error_Handler(void) {
 	__disable_irq();
 
-	while (1)
-		;
+	while (1);
 }
