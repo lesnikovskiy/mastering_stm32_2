@@ -54,7 +54,8 @@ int main(void) {
 			snprintf(usr_msg, sizeof(usr_msg), "Frequency of the signal applied = %f\r\n",
 					user_signal_freq);
 
-			HAL_UART_Transmit(&huart2, (uint8_t*) usr_msg, strlen(usr_msg), HAL_MAX_DELAY);
+			HAL_UART_Transmit(&huart2, (uint8_t*) usr_msg, strlen(usr_msg),
+			HAL_MAX_DELAY);
 
 			is_capture_done = FALSE;
 		}
@@ -72,12 +73,13 @@ void SystemClock_Config(uint8_t clock_freq) {
 	// Enable Power Control clock to modify voltage regulators for 180MHz
 	__HAL_RCC_PWR_CLK_ENABLE();
 
-	osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_LSE;
-	osc_init.HSIState = RCC_HSI_OFF;
+	osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_HSE
+			| RCC_OSCILLATORTYPE_LSE;
+	osc_init.HSIState = RCC_HSI_ON;
 	osc_init.HSEState = RCC_HSE_ON;
 	osc_init.LSEState = RCC_LSE_ON;
 	osc_init.PLL.PLLState = RCC_PLL_ON;
-	osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+	osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSE;
 
 	clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1
 			| RCC_CLOCKTYPE_PCLK2;
@@ -85,7 +87,7 @@ void SystemClock_Config(uint8_t clock_freq) {
 
 	switch (clock_freq) {
 		case SYS_CLK_FREQ_50_MHZ: {
-			osc_init.PLL.PLLM = 16;
+			osc_init.PLL.PLLM = 8;
 			osc_init.PLL.PLLN = 100;
 			osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 			osc_init.PLL.PLLR = 2;
@@ -100,7 +102,7 @@ void SystemClock_Config(uint8_t clock_freq) {
 			break;
 		}
 		case SYS_CLK_FREQ_84_MHZ: {
-			osc_init.PLL.PLLM = 16;
+			osc_init.PLL.PLLM = 8;
 			osc_init.PLL.PLLN = 168;
 			osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 			osc_init.PLL.PLLR = 2;
@@ -115,7 +117,7 @@ void SystemClock_Config(uint8_t clock_freq) {
 			break;
 		}
 		case SYS_CLK_FREQ_120_MHZ: {
-			osc_init.PLL.PLLM = 16;
+			osc_init.PLL.PLLM = 8;
 			osc_init.PLL.PLLN = 240;
 			osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 			osc_init.PLL.PLLR = 2;
@@ -136,14 +138,6 @@ void SystemClock_Config(uint8_t clock_freq) {
 
 	if (HAL_RCC_OscConfig(&osc_init) != HAL_OK) {
 		Error_Handler();
-	}
-
-	// CRITICAL: Activate Over-Drive mode to allow frequencies above 168 MHz
-	if (clock_freq != SYS_CLK_FREQ_50_MHZ && clock_freq != SYS_CLK_FREQ_84_MHZ
-			&& clock_freq != SYS_CLK_FREQ_120_MHZ) {
-		if (HAL_PWREx_EnableOverDrive() != HAL_OK) {
-			Error_Handler();
-		}
 	}
 
 	if (HAL_RCC_ClockConfig(&clk_init, flash_latency) != HAL_OK) {
@@ -178,7 +172,7 @@ void Timer2_Init(void) {
 }
 
 void MSO_Configuration(void) {
-	HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_LSE, RCC_MCODIV_1);
+	HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSI, RCC_MCODIV_4);
 }
 
 void UART2_Init(void) {
