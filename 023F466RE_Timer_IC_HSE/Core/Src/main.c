@@ -2,6 +2,7 @@
 
 void SystemClock_Config(uint8_t clock_freq);
 void Timer2_Init(void);
+void TIM6_Init(void);
 void UART2_Init(void);
 void HAL_GPIO_MspInit(void);
 void MSO_Configuration(void);
@@ -9,6 +10,7 @@ void Error_Handler(void);
 
 UART_HandleTypeDef huart2;
 TIM_HandleTypeDef htimer2;
+TIM_HandleTypeDef htimer6;
 
 uint32_t input_captures[2] = { 0 };
 uint8_t count = 1;
@@ -28,11 +30,16 @@ int main(void) {
 	SystemClock_Config(SYS_CLK_FREQ_50_MHZ);
 
 	Timer2_Init();
+	TIM6_Init();
 
 	MSO_Configuration();
 
 	UART2_Init();
 	HAL_GPIO_MspInit();
+
+	if (HAL_TIM_Base_Start_IT(&htimer6) != HAL_OK) {
+		Error_Handler();
+	}
 
 	if (HAL_TIM_IC_Start_IT(&htimer2, TIM_CHANNEL_1) != HAL_OK) {
 		Error_Handler();
@@ -171,8 +178,20 @@ void Timer2_Init(void) {
 	}
 }
 
+void TIM6_Init(void) {
+	htimer6.Instance = TIM6;
+
+	htimer6.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htimer6.Init.Prescaler = 9;
+	htimer6.Init.Period = 50 - 1;
+
+	if (HAL_TIM_Base_Init(&htimer6) != HAL_OK) {
+		Error_Handler();
+	}
+}
+
 void MSO_Configuration(void) {
-	HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSI, RCC_MCODIV_4);
+	HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_LSE, RCC_MCODIV_1);
 }
 
 void UART2_Init(void) {
@@ -212,6 +231,12 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 			count = 1;
 			is_capture_done = TRUE;
 		}
+	}
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	if (htim->Instance == TIM6) {
+		GPIOA->ODR ^= GPIO_PIN_5;
 	}
 }
 
