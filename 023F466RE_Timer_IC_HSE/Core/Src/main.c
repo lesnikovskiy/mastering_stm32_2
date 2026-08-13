@@ -53,7 +53,7 @@ int main(void) {
 				capture_difference = (0xFFFFFFFF - input_captures[0]) + input_captures[1];
 			}
 
-			timer2_cnt_freq = (double) (HAL_RCC_GetPCLK1Freq() * 2) / (htimer2.Init.Prescaler + 1);
+			timer2_cnt_freq = (HAL_RCC_GetPCLK1Freq() * 2) / (htimer2.Init.Prescaler + 1);
 			timer2_cnt_res = 1 / timer2_cnt_freq;
 			user_signal_time_period = capture_difference * timer2_cnt_res;
 			user_signal_freq = 1 / user_signal_time_period;
