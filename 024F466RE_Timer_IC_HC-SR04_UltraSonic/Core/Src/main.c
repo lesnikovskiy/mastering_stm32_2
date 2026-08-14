@@ -29,7 +29,7 @@ int main(void) {
 	MSO_Configuration();
 
 	UART2_Init();
-//	HAL_GPIO_MspInit();
+	HAL_GPIO_MspInit();
 
 	DWT_Init();
 
@@ -58,6 +58,7 @@ int main(void) {
 		}
 
 		HAL_Delay(100); // Read every 100ms
+		GPIOA->ODR ^= GPIO_PIN_5;
 	}
 
 	return 0;
@@ -166,7 +167,8 @@ void Timer2_Init(void) {
 	htimer2.Instance = TIM2;
 	htimer2.Init.CounterMode = TIM_COUNTERMODE_UP;
 	htimer2.Init.Period = 0xFFFF; // 65.5 ms max
-	htimer2.Init.Prescaler = (SystemCoreClock / 1000000) - 1; // Auto: 83 for 84MHz, 49 for 50MHz
+	// htimer2.Init.Prescaler = (SystemCoreClock / 1000000) - 1; // Auto: 83 for 84MHz, 49 for 50MHz
+	htimer2.Init.Prescaler = 84 - 1; // Auto: 83 for 84MHz, 49 for 50MHz
 	htimer2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1; // Optional here
 	htimer2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE; // Optional here
 
