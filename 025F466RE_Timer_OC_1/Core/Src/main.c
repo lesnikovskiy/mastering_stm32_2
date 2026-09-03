@@ -4,32 +4,17 @@ void SystemClock_Config(uint8_t clock_freq);
 void Timer2_Init(void);
 void UART2_Init(void);
 void HAL_GPIO_MspInit(void);
-void MSO_Configuration(void);
 void Error_Handler(void);
 
 UART_HandleTypeDef huart2;
 TIM_HandleTypeDef htimer2;
 
-uint32_t input_captures[2] = { 0 };
-uint8_t count = 1;
-uint8_t is_capture_done = FALSE;
-
 int main(void) {
-	uint32_t capture_difference = 0;
-	double timer2_cnt_freq = 0;
-	double timer2_cnt_res = 0;
-	double user_signal_time_period = 0;
-	double user_signal_freq = 0;
-
-	char usr_msg[100];
-
 	HAL_Init();
 
 	SystemClock_Config(SYS_CLK_FREQ_50_MHZ);
 
 	Timer2_Init();
-
-	MSO_Configuration();
 
 	UART2_Init();
 	HAL_GPIO_MspInit();
@@ -38,27 +23,7 @@ int main(void) {
 		Error_Handler();
 	}
 
-	while (1) {
-		if (is_capture_done) {
-			if (input_captures[1] > input_captures[0]) {
-				capture_difference = input_captures[1] - input_captures[0];
-			} else {
-				capture_difference = (0xFFFFFFFF - input_captures[0]) + input_captures[1];
-			}
-
-			timer2_cnt_freq = (HAL_RCC_GetPCLK1Freq() * 2) / (htimer2.Init.Prescaler + 1);
-			timer2_cnt_res = 1 / timer2_cnt_freq;
-			user_signal_time_period = capture_difference * timer2_cnt_res;
-			user_signal_freq = 1 / user_signal_time_period;
-
-			snprintf(usr_msg, sizeof(usr_msg), "Frequency of the signal applied = %f\r\n",
-					user_signal_freq);
-
-			HAL_UART_Transmit(&huart2, (uint8_t*) usr_msg, strlen(usr_msg), HAL_MAX_DELAY);
-
-			is_capture_done = FALSE;
-		}
-	}
+	while (1);
 
 	return 0;
 }
@@ -69,15 +34,11 @@ void SystemClock_Config(uint8_t clock_freq) {
 
 	uint8_t flash_latency = 0;
 
-	// Enable Power Control clock to modify voltage regulators for 180MHz
-	__HAL_RCC_PWR_CLK_ENABLE();
-
-	osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSE;
-	osc_init.HSIState = RCC_HSI_ON;
-	osc_init.LSEState = RCC_LSE_ON;
-	osc_init.HSICalibrationValue = 16;
+	osc_init.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+	osc_init.HSEState = RCC_HSE_ON;
+	osc_init.HSIState = RCC_HSI_OFF;
 	osc_init.PLL.PLLState = RCC_PLL_ON;
-	osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+	osc_init.PLL.PLLSource = RCC_PLLSOURCE_HSE;
 
 	clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1
 			| RCC_CLOCKTYPE_PCLK2;
@@ -85,7 +46,7 @@ void SystemClock_Config(uint8_t clock_freq) {
 
 	switch (clock_freq) {
 		case SYS_CLK_FREQ_50_MHZ: {
-			osc_init.PLL.PLLM = 16;
+			osc_init.PLL.PLLM = 8;
 			osc_init.PLL.PLLN = 100;
 			osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 			osc_init.PLL.PLLR = 2;
@@ -100,7 +61,7 @@ void SystemClock_Config(uint8_t clock_freq) {
 			break;
 		}
 		case SYS_CLK_FREQ_84_MHZ: {
-			osc_init.PLL.PLLM = 16;
+			osc_init.PLL.PLLM = 8;
 			osc_init.PLL.PLLN = 168;
 			osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 			osc_init.PLL.PLLR = 2;
@@ -115,7 +76,7 @@ void SystemClock_Config(uint8_t clock_freq) {
 			break;
 		}
 		case SYS_CLK_FREQ_120_MHZ: {
-			osc_init.PLL.PLLM = 16;
+			osc_init.PLL.PLLM = 8;
 			osc_init.PLL.PLLN = 240;
 			osc_init.PLL.PLLP = RCC_PLLP_DIV2;
 			osc_init.PLL.PLLR = 2;
@@ -136,14 +97,6 @@ void SystemClock_Config(uint8_t clock_freq) {
 
 	if (HAL_RCC_OscConfig(&osc_init) != HAL_OK) {
 		Error_Handler();
-	}
-
-	// CRITICAL: Activate Over-Drive mode to allow frequencies above 168 MHz
-	if (clock_freq != SYS_CLK_FREQ_50_MHZ && clock_freq != SYS_CLK_FREQ_84_MHZ
-			&& clock_freq != SYS_CLK_FREQ_120_MHZ) {
-		if (HAL_PWREx_EnableOverDrive() != HAL_OK) {
-			Error_Handler();
-		}
 	}
 
 	if (HAL_RCC_ClockConfig(&clk_init, flash_latency) != HAL_OK) {
@@ -177,10 +130,6 @@ void Timer2_Init(void) {
 	}
 }
 
-void MSO_Configuration(void) {
-	HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_LSE, RCC_MCODIV_1);
-}
-
 void UART2_Init(void) {
 	huart2.Instance = USART2;
 	huart2.Init.BaudRate = 115200;
@@ -206,19 +155,6 @@ void HAL_GPIO_MspInit(void) {
 	gpio.Speed = GPIO_SPEED_FREQ_HIGH;
 
 	HAL_GPIO_Init(GPIOA, &gpio);
-}
-
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
-	if (!is_capture_done) {
-		if (count == 1) {
-			input_captures[0] = __HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_1);
-			count++;
-		} else if (count == 2) {
-			input_captures[1] = __HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_1);
-			count = 1;
-			is_capture_done = TRUE;
-		}
-	}
 }
 
 void Error_Handler(void) {
